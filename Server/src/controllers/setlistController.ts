@@ -9,10 +9,9 @@ const handleResponse = (res: Response, status: number, message: string, data: an
     })
 };
 export const createSet = async(req: Request, res: Response, next: Function) => {
-    const {string: id} = req.body;
     try {
         const newSet = await Setlist.insertOne({
-            id: id,
+            id: req.body.id,
             songs: 0,
             cities: {},
             numofSongs: {}
