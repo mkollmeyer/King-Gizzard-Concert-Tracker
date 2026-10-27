@@ -26,5 +26,11 @@ const userSchema = new mongoose.Schema(
   }
 );
 
+export interface User {
+    id: string;
+    username: string;
+    password: string;
+}
+
 // Compile and export the model to handle queries against the 'users' collection
 export const Users = mongoose.model('Users', userSchema);
