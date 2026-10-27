@@ -25,13 +25,13 @@ export async function get_setlists(date: string): Promise<show> {
 };
 
 export async function create_user_setlists(id: string): Promise<show> {
-    const ref = await fetch(`http://localhost:3000/api/set`, {
+    const ref = await fetch(`http://localhost:3000/api/set/`, {
         method: 'POST',
         headers: {
-            'Accept': 'application/json',
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ id: id })});
+        body: JSON.stringify({ id: id })
+    });
     if (!ref.ok) {
         throw new Error(`HTTP error! status: ${ref.status}`);
     }
@@ -43,7 +43,7 @@ export async function get_user_setlists(id: string): Promise<show> {
     const ref = await fetch(`http://localhost:3000/api/set/${id}`, {
         method: 'GET',
         headers: {
-            'Accept': 'application/json'
+            'Accept': 'application/json',
         }
     });
     if (!ref.ok) {

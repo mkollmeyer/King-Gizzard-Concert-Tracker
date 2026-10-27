@@ -1,5 +1,6 @@
 import { Users } from "../models/userModel.ts";
 import { type Request, type Response } from 'express';
+import { createSet } from "./setlistController.ts";
 
 const handleResponse = (res: Response, status: number, message: string, data: any = null) => {
     res.status(status).json({
@@ -8,18 +9,12 @@ const handleResponse = (res: Response, status: number, message: string, data: an
         data
     })
 };
-function generate24CharId(): string {
-  const buffer = new Uint8Array(12);
-  crypto.getRandomValues(buffer);
-  return Array.from(buffer)
-    .map((byte) => byte.toString(16).padStart(2, '0'))
-    .join('');
-}
 
 export const createUser = async(req: Request, res: Response, next: Function) => {
+    const uid = crypto.randomUUID();
     try {
         const newUser = await Users.insertOne({
-            id: generate24CharId(),
+            id: uid,
             username: req.body.username,
             password: req.body.password
         });

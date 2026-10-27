@@ -29,8 +29,8 @@ export const useAuthStore = defineStore('auth', {
             try {
                 const userCredential = await createUser(username, password);
                 console.log(userCredential.id);
-                await create_user_setlists(await userCredential.id);
                 this.user = userCredential;
+                await create_user_setlists(this.user.id);
                 this.session = await createSession(userCredential.id);
                 console.log(this.user.username);
                 console.log(this.session.id);

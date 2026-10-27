@@ -9,14 +9,11 @@ const handleResponse = (res: Response, status: number, message: string, data: an
     })
 };
 export const createSet = async(req: Request, res: Response, next: Function) => {
+    const id = req.body.id as string;
+    console.log(id);
     try {
-        const id = req.body?.id;
-        if (typeof id !== "string" || id.trim().length === 0) {
-            return handleResponse(res, 400, "A setlist ID is required");
-        }
-
         const newSet = await Setlist.insertOne({
-            id,
+            id: id,
             songs: 0,
             cities: {},
             numofSongs: {}
@@ -36,7 +33,7 @@ export const getAllSet = async(req: Request, res: Response, next: Function) => {
 };
 export const getSetById = async(req: Request, res: Response, next: Function) => {
     try {
-        const Set = await Setlist.findById(req.params.id);
+        const Set = await Setlist.findOne({ id: req.params.id as string });
         if(!Set) return handleResponse(res, 404, "Setlist not found");
         handleResponse(res, 200, "Setlist retrieved", Set);
     } catch (err){

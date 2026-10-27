@@ -6,7 +6,6 @@ const setSchema = new mongoose.Schema(
     id: {
       type: String,
       required: [true, 'User ID is required'],
-      unique: true,
       trim: true
     },
     songs: {

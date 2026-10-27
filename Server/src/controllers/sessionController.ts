@@ -18,7 +18,6 @@ export type SessionValidationResult =
 
 export const createSession = async (req: Request, res: Response, next: Function) => {
 	const sessionId = base32.encode(createHash('sha256').update(req.body.Token , 'utf8').digest()).toLowerCase();
-    console.log(sessionId);
 	try {
 		const session: Session = await sessions.insertOne ({
 			id: sessionId,

@@ -2,7 +2,7 @@
 import { ref } from 'vue'
 import router from '../router/index.ts'
 import { useAuthStore } from '../stores/auth.ts'
-import { createUser } from '../router/userRoutes.ts'
+import { create_user_setlists } from '../router/statRoutes.ts'
 
 const auth = useAuthStore()
 
