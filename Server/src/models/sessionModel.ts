@@ -12,7 +12,6 @@ const modelSchema = new mongoose.Schema(
     userID: {
       type: String,
       required: [true, 'User ID is required'],
-      unique: true,
       trim: true
     },
     expiresAt: {

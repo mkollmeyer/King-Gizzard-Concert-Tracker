@@ -17,13 +17,14 @@ export type SessionValidationResult =
 	| { session: null; user: null, update: boolean };
 
 export const createSession = async (req: Request, res: Response, next: Function) => {
-	const sessionId = base32.encode(createHash('sha256').update(req.body.token, 'utf8').digest()).toLowerCase();
+	const sessionId = base32.encode(createHash('sha256').update(req.body.Token , 'utf8').digest()).toLowerCase();
+    console.log(sessionId);
 	try {
-		const session: Session = {
+		const session: Session = await sessions.insertOne ({
 			id: sessionId,
 			userID: req.body.userID,
 			expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30)
-		};
+		});
 		handleResponse(res, 201, "Session created", session);
 	} catch (error) {
 		next(error);
@@ -31,15 +32,16 @@ export const createSession = async (req: Request, res: Response, next: Function)
 }
 
 export async function invalidate(sessionId: string): Promise<void> {
-	await sessions.deleteOne({ id: sessionId });
+    const session = await sessions.findByIdAndDelete(sessionId);
 }
 
-export const invalidateSession = async (req: Request, res: Response, next: Function): Promise<void> => {
-	await invalidate(req.body.sessionId);
+export const invalidateSession = async (req: Request, res: Response, next: Function) => {
+    const session = await sessions.findByIdAndDelete(req.params.sessionId);
+    handleResponse(res, 200, "Session invalidated", session);
 }
 
-export async function validateSessionToken(token: string): Promise<SessionValidationResult> {
-	const sessionId = base32.encode(createHash('sha256').update(token, 'utf8').digest()).toLowerCase();
+export const validateSessionToken = async(req: Request, res: Response, next: Function) => {
+	const sessionId = base32.encode(createHash('sha256').update(req.body.token, 'utf8').digest()).toLowerCase();
 	const result = await sessions.aggregate([
         {
             $match: { id: sessionId }
@@ -74,8 +76,7 @@ export async function validateSessionToken(token: string): Promise<SessionValida
 			{ id: session.id },
 			{ $set: { expiresAt: session.expiresAt } }
 		);
-		return { session, user, update: true };
+		handleResponse(res, 200, "Session validated", { session, user, update: true });
 	}
-
-	return { session, user, update: false };
+	handleResponse(res, 200, "Session validated", { session, user, update: false });
 }

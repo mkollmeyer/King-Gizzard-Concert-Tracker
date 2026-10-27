@@ -8,10 +8,18 @@ const handleResponse = (res: Response, status: number, message: string, data: an
         data
     })
 };
+function generate24CharId(): string {
+  const buffer = new Uint8Array(12);
+  crypto.getRandomValues(buffer);
+  return Array.from(buffer)
+    .map((byte) => byte.toString(16).padStart(2, '0'))
+    .join('');
+}
+
 export const createUser = async(req: Request, res: Response, next: Function) => {
     try {
         const newUser = await Users.insertOne({
-            id: crypto.randomUUID(),
+            id: generate24CharId(),
             username: req.body.username,
             password: req.body.password
         });
@@ -39,8 +47,9 @@ export const getUserById = async(req: Request, res: Response, next: Function) =>
 };
 export const getUserbyUsername = async(req: Request, res: Response, next: Function) => {
     try {
-        const user = await Users.findOne({ where: { username: req.params.username } });
+        const user = await Users.findOne({ username: req.params.username as string });
         if(!user) return handleResponse(res, 404, "User not found");
+        console.log("Found user:", user);
         handleResponse(res, 200, "User retrieved", user);
     } catch (err){
         next(err);

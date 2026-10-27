@@ -10,8 +10,13 @@ const handleResponse = (res: Response, status: number, message: string, data: an
 };
 export const createSet = async(req: Request, res: Response, next: Function) => {
     try {
+        const id = req.body?.id;
+        if (typeof id !== "string" || id.trim().length === 0) {
+            return handleResponse(res, 400, "A setlist ID is required");
+        }
+
         const newSet = await Setlist.insertOne({
-            id: req.body.id,
+            id,
             songs: 0,
             cities: {},
             numofSongs: {}

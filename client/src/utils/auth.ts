@@ -1,5 +1,6 @@
 import * as base32 from 'hi-base32';
 import { type User, type Session } from '../router/userRoutes';
+import { tokenService } from './token';
 
 export function generateSecureToken(): string {
 	const bytes = new Uint8Array(20);
@@ -8,7 +9,7 @@ export function generateSecureToken(): string {
 }
 
 export async function getAuth(): Promise<{ session: Session | null; user: User | null; update: boolean }> {
-    const token = localStorage.getItem('authToken');
+    const token = tokenService.getToken();
     const result = await fetch(`http://localhost:3000/api/session/${token}`);
     if (!result.ok) {
         throw new Error(`HTTP error! status: ${result.status}`);
@@ -24,4 +25,5 @@ export async function signout(sessionID: string): Promise<void> {
     if (!result.ok) {
         throw new Error(`HTTP error! status: ${result.status}`);
     }
+    tokenService.removeToken();
 }

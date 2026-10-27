@@ -24,8 +24,23 @@ export async function get_setlists(date: string): Promise<show> {
     });
 };
 
+export async function create_user_setlists(id: string): Promise<show> {
+    const ref = await fetch(`http://localhost:3000/api/set`, {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ id: id })});
+    if (!ref.ok) {
+        throw new Error(`HTTP error! status: ${ref.status}`);
+    }
+    const user = await ref.json();
+    return user.data;
+}
+
 export async function get_user_setlists(id: string): Promise<show> {
-    const ref = await fetch(`http://localhost:3000/api/setlist/${id}`, {
+    const ref = await fetch(`http://localhost:3000/api/set/${id}`, {
         method: 'GET',
         headers: {
             'Accept': 'application/json'
@@ -44,7 +59,7 @@ export async function get_user_setlists(id: string): Promise<show> {
 }
 
 export async function update_user_setlists(id: string, city: string, num_songs: number, setlist: string[]): Promise<void> {
-    const ref = await fetch(`http://localhost:3000/api/setlist/${id}`, {
+    const ref = await fetch(`http://localhost:3000/api/set/${id}`, {
         method: 'POST',
         headers: {
             'Accept': 'application/json',

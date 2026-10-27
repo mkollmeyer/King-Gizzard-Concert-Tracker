@@ -1,5 +1,6 @@
-import { verifyPassword } from "../utils/password.ts";
+import { verifyPassword, hashPassword } from "../utils/password.ts";
 import { generateSecureToken } from "../utils/auth.ts";
+import { tokenService } from "../utils/token.ts";
 
 export interface User {
     id: string;
@@ -19,12 +20,13 @@ export async function createUser(username: string, password: string): Promise<Us
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ username, password })
+        body: JSON.stringify({ username: username, password: await hashPassword(password) })
     });
     if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
     }
-    const user = await response.json();
+    const res = await response.json();
+    const user: User = res.data;
     return user;
 };
 
@@ -33,23 +35,33 @@ export async function signin(username: string, password: string): Promise<User> 
     if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
     }
-    const user: User = await response.json();
+    console.log("Found username");
+    const result = await response.json();
+    const user: User = result.data;
+    console.log(user.password);
     if (await verifyPassword(password, user.password)) {
+        console.log("Password verified");
         return user;
     };
-    return user;
+    console.log("Password verification failed");
+    throw new Error("Invalid username or password");
 };
 
 export async function createSession(userID: string): Promise<Session> {
+    const token = await generateSecureToken();
+    await tokenService.setToken(token);
+    console.log(token);
     const result = await fetch('http://localhost:3000/api/session/', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ Token: generateSecureToken(), userID: userID })
+        body: JSON.stringify({ Token: token, userID: userID })
     });
     if (!result.ok) {
         throw new Error(`HTTP error! status: ${result.status}`);
     }
-    return result.json();
+    const response = await result.json();
+    console.log(response.data);
+    return response.data;
 };

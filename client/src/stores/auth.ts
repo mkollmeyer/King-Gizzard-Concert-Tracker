@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 import { createSession, createUser, signin, type Session } from "../router/userRoutes.ts";
 import { type User } from "../router/userRoutes.ts";
+import { create_user_setlists } from "../router/statRoutes.ts";
 import { signout } from "../utils/auth.ts";
 
 export interface AuthState {
@@ -9,7 +10,6 @@ export interface AuthState {
     update: boolean,
     error: Error | null
 }
-
 
 export const useAuthStore = defineStore('auth', {
     state: (): AuthState => ({
@@ -20,14 +20,20 @@ export const useAuthStore = defineStore('auth', {
     }),
     persist: true,
     getters: {
-        getUser(): User | null {return this.user;}
+        getUser(): User | null {return this.user;},
+        getSession(): Session | null {return this.session;}
     },
     actions: {
         async registerUser(username: string, password: string) {
             this.error = null;
             try {
                 const userCredential = await createUser(username, password);
+                console.log(userCredential.id);
+                await create_user_setlists(await userCredential.id);
                 this.user = userCredential;
+                this.session = await createSession(userCredential.id);
+                console.log(this.user.username);
+                console.log(this.session.id);
             } catch (error: unknown) {
                 if (error instanceof Error) {this.error = error;}
             }
@@ -36,8 +42,11 @@ export const useAuthStore = defineStore('auth', {
             this.error = null;
             try {
                 const userCredential = await signin(username, password);
+                console.log("User signed in:", userCredential);
                 this.user = userCredential;
                 this.session = await createSession(userCredential.id);
+                console.log(this.user.username);
+                console.log(this.session.id);
             } catch (error: unknown) {
                 if (error instanceof Error) {this.error = error;}
             }
