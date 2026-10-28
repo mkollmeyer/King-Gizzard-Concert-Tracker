@@ -22,7 +22,7 @@ export const createSession = async (req: Request, res: Response, next: Function)
 		const session: Session = await sessions.insertOne ({
 			id: sessionId,
 			userID: req.body.userID,
-			expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30)
+			expiresAt: new Date(Date.now() + 1000 * 60 * 30)
 		});
 		handleResponse(res, 201, "Session created", session);
 	} catch (error) {

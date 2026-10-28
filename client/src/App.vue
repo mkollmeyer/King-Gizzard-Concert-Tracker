@@ -1,19 +1,15 @@
 <script setup lang="ts">
+import navbar from './components/navbar.vue';
 </script>
 
 <template>
+  <navbar/>
   <div id = 'app'>
     <router-view />
   </div>
 </template>
 
 <style scoped>
-
-body, html {
-  margin: 0;
-  height: 100%;
-  padding: 0;
-}
 
 header {
   line-height: 1.5;
@@ -49,5 +45,12 @@ header {
     place-items: flex-start;
     flex-wrap: wrap;
   }
+}
+</style>
+<style>
+body, html {
+  margin: 0px;
+  height: 100%;
+  padding: 0;
 }
 </style>

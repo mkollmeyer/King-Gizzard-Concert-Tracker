@@ -1,12 +1,13 @@
 import express from "express"
-import { createSet, getAllSet, getSetById, updateSet, deleteSet } from "../controllers/setlistController.ts"
+import { createSet, getAllSet, getSetById, updateSet, deleteSet, get_setlists } from "../controllers/setlistController.ts"
 
 const setRouter= express.Router();
 
 setRouter.post("/set", createSet);
 setRouter.get("/set", getAllSet);
+setRouter.get("/set/api/:date", get_setlists);
 setRouter.get("/set/:id", getSetById);
-setRouter.put("/set/:id", updateSet);
+setRouter.post("/set/:id", updateSet);
 setRouter.delete("/set/:id", deleteSet);
 
 export default setRouter;

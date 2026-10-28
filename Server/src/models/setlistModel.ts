@@ -9,7 +9,8 @@ const setSchema = new mongoose.Schema(
       trim: true
     },
     songs: {
-      type: Number,
+      type: Map,
+      of: Number,
       required: [true, 'Song count is required']
     },
     cities: {
@@ -18,8 +19,7 @@ const setSchema = new mongoose.Schema(
       required: [true, 'Cities are required']
     },
     numofSongs: {
-        type: Map,
-        of: Number,
+        type: Number,
         required: [true, 'Number of songs is required']
     },
   },
@@ -27,6 +27,12 @@ const setSchema = new mongoose.Schema(
     timestamps: true
   }
 );
+
+export interface show {
+  setlist: Record<string, number>;
+  city: Record<string, number>;
+  num_songs: Number;
+};
 
 // Compile and export the model to handle queries against the 'setlists' collection
 export const Setlist = mongoose.model('Setlist', setSchema);

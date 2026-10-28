@@ -13,10 +13,6 @@ const localError = ref('')
 
 async function submitLogin() {
   localError.value = ''
-  console.log("Attempting to sign in...");
-  console.log("Username: " + username.value);
-  console.log("Password: " + password.value);
-
   await auth.login(username.value, password.value)
   if (auth.user) {
     router.push('/stats')
@@ -62,8 +58,8 @@ async function submitLogin() {
 .signup-card {
   width: min(100%, 24rem);
   padding: 1.5rem;
-  background: #000000;
-  border: 1px solid #eb0c0c;
+  background: #f9f8f5;
+  border: 1px solid #dcd9d5;
   border-radius: 0.75rem;
   display: flex;
   flex-direction: column;
@@ -78,7 +74,7 @@ async function submitLogin() {
 
 .field input {
   padding: 0.65rem 0.75rem;
-  border: 1px solid #d09a1b;
+  border: 1px solid #d4d1ca;
   border-radius: 0.35rem;
 }
 
@@ -87,7 +83,7 @@ async function submitLogin() {
   padding: 0.7rem 0.9rem;
   border-radius: 0.4rem;
   background: #01696f;
-  color: #8f7614;
+  color: #f9f8f4;
   font-weight: 600;
 }
 

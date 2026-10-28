@@ -1,27 +1,32 @@
 export interface show {
+    city: Record<string, number>;
+    num_songs: number;
+    setlist: Record<string, number>;
+};
+
+export interface newshow {
     city: string;
     num_songs: number;
     setlist: string[];
 };
 
-export async function get_setlists(date: string): Promise<show> {
-    const ref = await fetch(`https://api.setlist.fm/rest/1.0/search/setlists?artistMbid=f58384a4-2ad2-4f24-89c5-c7b74ae1cce7&date=${date}`, {
+export async function get_setlists(date: string): Promise<newshow> {
+    const ref = await fetch(`http://localhost:3000/api/set/api/${date}`, {
         method: 'GET',
         headers: {
             'Accept': 'application/json',
-            'x-api-key': import.meta.env.VITE_API_KEY
         }
     });
     if (!ref.ok) {
         throw new Error(`HTTP error! status: ${ref.status}`);
     };
-    return ref.json().then((data) => {
-        return {
-            city: data.setlist[0].venue.city.name,
-            num_songs: data.setlist[0].sets.set[0].song.length,
-            setlist: data.setlist[0].sets.set[0].song.map((song: any) => song.name)
-        };
-    });
+    const res = await ref.json();
+    const data = res.data;
+    return {
+        city: data.city,
+        num_songs: data.num_songs,
+        setlist: data.setlist
+    };
 };
 
 export async function create_user_setlists(id: string): Promise<show> {
@@ -49,16 +54,25 @@ export async function get_user_setlists(id: string): Promise<show> {
     if (!ref.ok) {
         throw new Error(`HTTP error! status: ${ref.status}`);
     }
-    return ref.json().then((data) => {
-        return {
-            city: data.setlist[0].venue.city.name,
-            num_songs: data.setlist[0].sets.set[0].song.length,
-            setlist: data.setlist[0].sets.set[0].song.map((song: any) => song.name)
-        };
-    });
-}
+    const res = await ref.json();
+    const data = res.data;
+    let city: Record<string, number>;
+    let num_songs: number;
+    let setList: Record<string, number>;
+    city = data.cities;
+    setList = data.songs;
+    num_songs = data.numofSongs;
+    console.log(city);
+    console.log(num_songs);
+    console.log(setList);
+    return {
+        city: city,
+        num_songs: num_songs,
+        setlist: setList
+    };
+};
 
-export async function update_user_setlists(id: string, city: string, num_songs: number, setlist: string[]): Promise<void> {
+export async function update_user_setlists(id: string, city: Record<string, number>, num_songs: number, setlist: Record<string, number>): Promise<void> {
     const ref = await fetch(`http://localhost:3000/api/set/${id}`, {
         method: 'POST',
         headers: {
