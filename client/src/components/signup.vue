@@ -4,7 +4,7 @@ import router from '../router/index.ts'
 import { useAuthStore } from '../stores/auth.ts'
 
 const auth = useAuthStore()
-
+auth.error = null
 const username = ref('')
 const password = ref('')
 const confirmPassword = ref('')
@@ -23,10 +23,9 @@ async function submitSignup() {
     return
   }
 
-  await auth.registerUser(username.value, password.value)
-
-  if (auth.user) {
-    router.push('/stats')
+  const registered = await auth.registerUser(username.value, password.value)
+  if (registered) {
+    await router.push('/stats')
   }
 }
 </script>

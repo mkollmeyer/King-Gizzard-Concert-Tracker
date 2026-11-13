@@ -67,8 +67,12 @@ function createBarChart(
       },
       scales: {
         x: {
+          position: 'top',
           beginAtZero: true,
-          ticks: { precision: 0 }
+          ticks: {
+            precision: 0,
+            display: entries.length > 0
+          }
         },
         y: {
           grid: { display: false }
@@ -87,6 +91,10 @@ function updateBarChart(chart: BarChart | null, entries: CountEntry[]) {
   const dataset = chart.data.datasets[0]
   if (!dataset) return
   dataset.data = entries.map(([, count]) => count)
+  const xScale = chart.options.scales?.x
+  if (xScale?.ticks) {
+    xScale.ticks.display = entries.length > 0
+  }
   chart.update()
 }
 

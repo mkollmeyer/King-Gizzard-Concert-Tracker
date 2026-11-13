@@ -2,7 +2,8 @@ import { defineStore } from "pinia";
 import { createSession, createUser, signin, type Session } from "../router/userRoutes.ts";
 import { type User } from "../router/userRoutes.ts";
 import { create_user_setlists } from "../router/statRoutes.ts";
-import { signout } from "../utils/auth.ts";
+import { signout as invalidateSession } from "../utils/auth.ts";
+import { tokenService } from "../utils/token.ts";
 
 export interface AuthState {
     session: Session | null,
@@ -24,40 +25,71 @@ export const useAuthStore = defineStore('auth', {
         getSession(): Session | null {return this.session;}
     },
     actions: {
-        async registerUser(username: string, password: string) {
+        async registerUser(username: string, password: string): Promise<boolean> {
             this.error = null;
             try {
                 const userCredential = await createUser(username, password);
-                this.user = userCredential;
                 await create_user_setlists(userCredential.id);
-                this.session = await createSession(userCredential.id);
-                console.log(this.user.username);
-                console.log(this.session.id);
+                const session = await createSession(userCredential.id);
+                this.user = userCredential;
+                this.session = session;
+                return true;
             } catch (error: unknown) {
-                if (error instanceof Error) {this.error = error;}
+                this.user = null;
+                this.session = null;
+                this.error = new Error('Unable to create account');
+                return false;
             }
         },
-        async login(username: string, password: string) {
+        async login(username: string, password: string): Promise<boolean> {
             this.error = null;
             try {
                 const userCredential = await signin(username, password);
                 console.log("User signed in:", userCredential);
+                const session = await createSession(userCredential.id);
                 this.user = userCredential;
-                this.session = await createSession(userCredential.id);
+                this.session = session;
+                return true;
             } catch (error: unknown) {
-                if (error instanceof Error) {this.error = error;}
+                this.user = null;
+                this.session = null;
+                this.error = new Error('Unable to log in');
+                return false;
             }
         },
         setUser(user: User | null) {
             this.user = user;
         },
-        async signout() {
+        async clearExpiredSession() {
+            const session = this.session;
+            if (!session) return;
+
+            const expiresAt = Date.parse(String(session.expiresAt));
+            if (Number.isFinite(expiresAt) && Date.now() < expiresAt) return;
+
+            this.user = null;
+            this.session = null;
+            this.error = null;
+            tokenService.removeToken();
+
             try {
-                await signout((this.session!.id));
+                await invalidateSession(session.id);
+            } catch (error: unknown) {
+                console.error("Unable to invalidate expired session:", error);
+            }
+        },
+        async signout() {
+            if (!this.session) {
+                throw new Error("No active session to invalidate");
+            }
+            try {
+                await invalidateSession(this.session.id);
                 this.user = null;
                 this.session = null;
-            } catch (error) {
-                console.error("Error signing out user:", error);
+                this.error = null;
+            } catch (error: unknown) {
+                this.error = error instanceof Error ? error : new Error("Unable to log out");
+                throw error;
             }
         }
     }

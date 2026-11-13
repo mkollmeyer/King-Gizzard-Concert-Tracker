@@ -1,11 +1,26 @@
 <script setup lang="ts">
-import { useAuthStore } from '../stores/auth.ts'; 
-import { useRoute } from 'vue-router'
+import { ref } from 'vue'
+import { useAuthStore } from '../stores/auth.ts'
+import { useRoute, useRouter } from 'vue-router'
+
 const authStore = useAuthStore();
 const route = useRoute();
+const router = useRouter();
+const logoutError = ref('');
+
 const isStats = (): boolean => {
     return route.path === '/stats';
 };
+
+async function logout() {
+  logoutError.value = '';
+  try {
+    await authStore.signout();
+    await router.push('/login');
+  } catch (error) {
+    logoutError.value = error instanceof Error ? error.message : 'Unable to log out';
+  }
+}
 </script>
 
 <template>
@@ -15,8 +30,9 @@ const isStats = (): boolean => {
       <button v-else="isStats()" @click="$router.push('/stats');">Stats</button>
     </div>
     <div id="right">
-      <button v-if="authStore.user===null" @click="$router.push('/login'); authStore.$persist();">Login</button>
-      <button v-else @click="authStore.signout(); $router.push('/login'); authStore.$persist();">Logout</button>
+      <button v-if="authStore.user===null" @click="router.push('/login')">Login</button>
+      <button v-else @click="logout">Logout</button>
+      <p v-if="logoutError" role="alert">{{ logoutError }}</p>
     </div>
   </nav>
 </template>
@@ -39,7 +55,7 @@ const isStats = (): boolean => {
   position: sticky;
   top: 0;
   left: 0;
-  width: 98.75%;
+  width: 98.4%;
   z-index: 1000;
   align-self: flex-start;
 }

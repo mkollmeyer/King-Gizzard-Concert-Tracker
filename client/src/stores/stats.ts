@@ -16,13 +16,18 @@ export const useStatsStore = defineStore('stats', {
   }),
   actions: {
     async updateStats(id: string | null, date: string) {
+      let shows;
       if (id != null) {
-        const shows = await get_setlists(date);
+        try {
+          shows = await get_setlists(date);
+        } catch (error: unknown) {
+          console.error("Error fetching setlists:", error);
+          throw new Error('Unable to find setlist for that show');
+        }
         const userShow = await get_user_setlists(id);
         console.log(userShow);
         if (userShow.date?.includes(shows.date)) {
-          console.log("Date already exists in user setlist");
-          return;
+          throw new Error("Show already added to the stats");
         }
         const newShow: show = update_show(userShow, shows.city, shows.date, shows.num_songs, shows.setlist);
         console.log(newShow);

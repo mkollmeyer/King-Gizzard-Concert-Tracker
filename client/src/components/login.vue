@@ -4,6 +4,7 @@ import router from '../router/index.ts'
 import { useAuthStore } from '../stores/auth.ts'
 
 const auth = useAuthStore()
+auth.error = null
 
 console.log("Loaded login.vue");
 
@@ -13,10 +14,15 @@ const localError = ref('')
 
 async function submitLogin() {
   localError.value = ''
-  await auth.login(username.value, password.value)
-  if (auth.user) {
-    router.push('/stats')
+  const loggedIn = await auth.login(username.value, password.value)
+  if (loggedIn) {
+    await router.push('/stats')
   }
+}
+
+function clearErrors() {
+  localError.value = ''
+  auth.error = null
 }
 </script>
 <template>
@@ -40,7 +46,7 @@ async function submitLogin() {
 
       <p class="switch-text">
         Don't Have an Account?
-        <router-link to="/signup" class="switch-link">Sign up</router-link>
+        <router-link to="/signup" class="switch-link" @click="clearErrors">Sign up</router-link>
       </p>
     </div>
   </section>

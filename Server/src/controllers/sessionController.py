@@ -30,8 +30,8 @@ def invalidate(session_id: str) -> None:
     session_collection.find_one_and_delete({"id": session_id})
 
 def invalidate_session(session_id: str) -> dict[str, Any]:
-    session = session_collection.find_one_and_delete({"id": session_id})
-    return _handle_response(200, "Session invalidated", session)
+    session_collection.find_one_and_delete({"id": session_id})
+    return _handle_response(200, "Session invalidated")
 
 def validate_session_token(token: str) -> dict[str, Any]:
     session = session_collection.find_one({"id": _session_id(token)})
