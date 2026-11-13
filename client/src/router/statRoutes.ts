@@ -1,11 +1,13 @@
 export interface show {
     city: Record<string, number>;
+    date: string[];
     num_songs: number;
     setlist: Record<string, number>;
 };
 
 export interface newshow {
     city: string;
+    date: string;
     num_songs: number;
     setlist: string[];
 };
@@ -22,7 +24,9 @@ export async function get_setlists(date: string): Promise<newshow> {
     };
     const res = await ref.json();
     const data = res.data;
+    console.log(data);
     return {
+        date: data.date,
         city: data.city,
         num_songs: data.num_songs,
         setlist: data.setlist
@@ -56,30 +60,22 @@ export async function get_user_setlists(id: string): Promise<show> {
     }
     const res = await ref.json();
     const data = res.data;
-    let city: Record<string, number>;
-    let num_songs: number;
-    let setList: Record<string, number>;
-    city = data.cities;
-    setList = data.songs;
-    num_songs = data.numofSongs;
-    console.log(city);
-    console.log(num_songs);
-    console.log(setList);
     return {
-        city: city,
-        num_songs: num_songs,
-        setlist: setList
+        date: data.dates ?? [],
+        city: data.cities ?? {},
+        num_songs: data.num_songs ?? 0,
+        setlist: data.songs ?? {}
     };
 };
 
-export async function update_user_setlists(id: string, city: Record<string, number>, num_songs: number, setlist: Record<string, number>): Promise<void> {
+export async function update_user_setlists(id: string, city: Record<string, number>, dates: string[], num_songs: number, setlist: Record<string, number>): Promise<void> {
     const ref = await fetch(`http://localhost:8000/api/setlists/update_setlist/${id}`, {
         method: 'PUT',
         headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ city, num_songs, setlist })
+        body: JSON.stringify({ city, dates, num_songs, songs: setlist })
     });
     if (!ref.ok) {
         throw new Error(`HTTP error! status: ${ref.status}`);
