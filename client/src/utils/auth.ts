@@ -26,4 +26,5 @@ export async function signout(sessionID: string): Promise<void> {
         throw new Error(`HTTP error! status: ${result.status}`);
     }
     tokenService.removeToken();
+    localStorage.clear();
 }

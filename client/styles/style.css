@@ -29,6 +29,20 @@
   }
 }
 
+@font-face {
+  font-family: 'Gamer-Bold';
+  src: url('./fonts/Gamer Bold.ttf') format('truetype');
+  font-weight: bold;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Davida-Becker';
+  src: url('./fonts/Davida Becker Caps Regular.ttf') format('truetype');
+  font-weight: bold;
+  font-style: normal;
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
     --text: #9ca3af;

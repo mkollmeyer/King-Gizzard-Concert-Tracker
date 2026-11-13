@@ -35,7 +35,7 @@ const isStats = (): boolean => {
   position: sticky; 
   align-items: center;
   justify-items: top;
-  background-color: rgb(204, 171, 171);
+  background-color: #942311;
   position: sticky;
   top: 0;
   left: 0;

@@ -33,7 +33,7 @@ async function submitSignup() {
 <template>
   <section class="signup-view">
     <div class="signup-card">
-      <h1 :style="{color:'black'}">Create Account</h1>
+      <h1 style="color: white; font-family: Gamer-Bold; font-size: 2rem">Create Account</h1>
 
       <label class="field">
         <span>Username</span>
@@ -72,9 +72,13 @@ async function submitSignup() {
 }
 
 .signup-card {
+  font-family: 'Roboto Mono Variable', monospace;
+  font-weight: 400;
   width: min(100%, 24rem);
   padding: 1.5rem;
-  background: #f9f8f5;
+  background: #000000;
+  color: #fff;
+  text-align: left;
   border: 1px solid #dcd9d5;
   border-radius: 0.75rem;
   display: flex;
@@ -95,10 +99,11 @@ async function submitSignup() {
 }
 
 .primary-btn {
+  font-family: 'Roboto Mono Variable', monospace;
   border: none;
   padding: 0.7rem 0.9rem;
   border-radius: 0.4rem;
-  background: #01696f;
+  background: #254c37;
   color: #f9f8f4;
   font-weight: 600;
 }
@@ -109,13 +114,14 @@ async function submitSignup() {
 }
 
 .switch-text {
+  font-family: 'Roboto Mono Variable', monospace;
   margin: 0;
   text-align: center;
   color: #5f5c56;
 }
 
 .switch-link {
-  color: #01696f;
+  color: #e8d757;
   font-weight: 600;
   text-decoration: none;
 }
