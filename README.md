@@ -4,5 +4,14 @@ This is a web app built to track the songs you have seen live as well as the cit
 ## Tech stack
 The frontend was built in vue and typescript for the interface. The backend was built in python using fastAPI as a framework, and mongoDB as the database.
 
+## Running with Docker Compose
+Set the Compose interpolation variables in the root `.env` file, and set `API_KEY` in `server/.env`. From the repository root, run:
+
+```sh
+docker compose --env-file .env up --build
+```
+
+The root `.env` supplies values referenced with `${...}` in `docker-compose.yml`. A service's `env_file` only supplies variables inside that container.
+
 ## Coming soon
 Coming up, the website will be deployed on an AWS
