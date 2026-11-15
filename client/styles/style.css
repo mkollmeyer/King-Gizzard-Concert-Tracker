@@ -3,13 +3,16 @@
   --text-h: #08060d;
   --bg: #fff;
   --border: #e5e4e7;
+  --button-bg: #254c37;
+  --link-color: #e8d757;
   --code-bg: #f4f3ec;
   --accent: #aa3bff;
+  --background-color: #942311;
   --accent-bg: rgba(170, 59, 255, 0.1);
   --accent-border: rgba(170, 59, 255, 0.5);
   --social-bg: rgba(244, 243, 236, 0.5);
   --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+    rgba(255, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
 
   --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
   --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
@@ -27,6 +30,46 @@
   @media (max-width: 1024px) {
     font-size: 16px;
   }
+}
+
+:root[data-theme='theme-alien'] {
+  --background-color: #4e6d72;
+  --text: #48424f;
+  --button-bg: #230f13;
+  --link-color: #7ca181;
+  --shadow: #1f0000;
+}
+
+:root[data-theme='theme-omnium'] {
+  --background-color: #f7bb91;
+  --text: #000000;
+  --button-bg: #996360;
+  --link-color: #cf9273;
+  --shadow: #986d66;
+}
+
+:root[data-theme='theme-fuzz'] {
+  --background-color: #2a4b2b;
+  --text: #6b6375;
+  --button-bg: #b03726;
+  --link-color: #63ac3f;
+  --shadow: #c51964;
+}
+
+:root[data-theme='theme-banana'] {
+  --background-color: #3e4eb2;
+  --text: #000000;
+  --button-bg: #d4c028;
+  --link-color: #d4c028;
+  --shadow: #3a0b15;
+}
+
+:root[data-theme='theme-nonagon'] {
+  --background-color: #942311;
+  --text: #312d35;
+  --button-bg: #254c37;
+  --link-color: #e8d757;
+  --shadow: rgb(255, 36, 36);
 }
 
 @font-face {

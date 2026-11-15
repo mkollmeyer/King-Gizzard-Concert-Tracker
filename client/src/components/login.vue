@@ -92,7 +92,7 @@ function clearErrors() {
   border: none;
   padding: 0.7rem 0.9rem;
   border-radius: 0.4rem;
-  background: #254c37;
+  background: var(--button-bg);
   color: #f9f8f4;
   font-weight: 600;
 }
@@ -110,7 +110,7 @@ function clearErrors() {
 }
 
 .switch-link {
-  color: #e8d757;
+  color: var(--link-color);
   font-weight: 600;
   text-decoration: none;
 }

@@ -141,7 +141,10 @@ onBeforeUnmount(() => {
 async function submitDate() {
   localError.value = ''
   try {
-    await stats.updateStats(auth.getUser?.id ?? null, date.value)
+    if (!date.value) localError.value = 'Please select a date'
+    const [year, month, day] = date.value.split('-');
+    const formattedDate = `${day}-${month}-${year}`;
+    await stats.updateStats(auth.getUser?.id ?? null, formattedDate)
   } catch (error) {
     localError.value = error instanceof Error ? error.message : 'Unable to update stats'
   }
@@ -154,8 +157,8 @@ async function submitDate() {
       <h1>Your concert stats</h1>
       <form class="checkin-form" @submit.prevent="submitDate">
         <label class="field" for="show-date">
-          <span>Date of show attended (DD-MM-YYYY)</span>
-          <input id="show-date" v-model="date" type="text" placeholder="dd-mm-yyyy" required />
+          <span>Date of show attended</span>
+          <input id="show-date" v-model="date" type="date" required />
         </label>
         <button type="submit">Add show</button>
       </form>
@@ -204,7 +207,7 @@ async function submitDate() {
 
 .stats-header h1 {
   font-family: 'Gamer-Bold', sans-serif;
-  text-shadow: 2px 2px 4px red;
+  text-shadow: 2px 2px 4px var(--shadow);
   text-align: center;
   margin-top: 0;
 }
@@ -221,6 +224,7 @@ async function submitDate() {
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
+  color: #fff;
 }
 
 .field input {
@@ -268,7 +272,7 @@ button {
 
 .chart-description {
   font-family: 'Gamer-Bold', sans-serif;
-  text-shadow: 2px 2px 4px red;
+  text-shadow: 2px 2px 4px var(--shadow);
   font-size: 30px;
 }
 
@@ -281,7 +285,7 @@ button {
   justify-content: center;
   gap: 0.5rem;
   font-family: 'Gamer-Bold', sans-serif;
-  text-shadow: 2px 2px 4px red;
+  text-shadow: 2px 2px 4px var(--shadow);
   font-weight: bold;
   font-size: 30px;
 }
@@ -289,7 +293,7 @@ button {
 .Songsdiv h2 {
   font-family: 'Gamer-Bold', sans-serif;
   font-weight: bold;
-  text-shadow: 2px 2px 4px red;
+  text-shadow: 2px 2px 4px var(--shadow);
 }
 
 .chart-container {
