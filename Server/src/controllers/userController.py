@@ -2,6 +2,7 @@ import bcrypt
 from fastapi import Body, HTTPException
 from pymongo.errors import DuplicateKeyError
 from src.config.db import user_collection
+from src.controllers.sessionController import create_session_for_user
 from src.models.userModel import user_data
 import uuid
 
@@ -12,7 +13,12 @@ def authenticate_user(username: str = Body(...), password: str = Body(...)):
         user["password"].encode("utf-8"),
     ):
         raise HTTPException(status_code=401, detail="Invalid username or password")
-    return {"data": user_data(user)}
+    return {
+        "data": {
+            **user_data(user),
+            "token": create_session_for_user(user["id"]),
+        }
+    }
 
 def create_user(username: str = Body(...), password: str = Body(...)):
     id = str(uuid.uuid4())
@@ -23,7 +29,12 @@ def create_user(username: str = Body(...), password: str = Body(...)):
             "password": password
         }
         user_collection.insert_one(user.copy())
-        return {"data": user_data(user)}
+        return {
+            "data": {
+                **user_data(user),
+                "token": create_session_for_user(id),
+            }
+        }
     except DuplicateKeyError as e:
         key_pattern = (e.details or {}).get("keyPattern", {})
         field = "username" if "username" in key_pattern else "id"

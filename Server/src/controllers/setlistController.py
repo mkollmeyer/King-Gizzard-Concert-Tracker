@@ -1,9 +1,10 @@
-from fastapi import Body, HTTPException
+from fastapi import Body, Depends, HTTPException
 import httpx
 import os
 from src.config.db import setlist_collection
 from src.models.setlistModel import setlist_data, Show
 from dotenv import load_dotenv
+from src.controllers.sessionController import get_current_user
 
 load_dotenv()
 
@@ -31,9 +32,9 @@ async def get_setlist(date: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error retrieving setlist: {str(e)}") from e
 
-def get_setlist_by_username(username: str):
+def get_setlist_by_username(current_user: dict[str, str] = Depends(get_current_user)):
     try:
-        data = setlist_collection.find_one({"username": username})
+        data = setlist_collection.find_one({"username": current_user["username"]})
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error retrieving setlist: {str(e)}") from e
     if data is None:
@@ -48,8 +49,9 @@ def get_setlist_by_username(username: str):
         }
     }
 
-def create_setlist(username: str = Body(..., embed=True)):
+def create_setlist(current_user: dict[str, str] = Depends(get_current_user)):
     try:
+        username = current_user["username"]
         setlist = {
             "username": username,
             "dates": [],
@@ -66,7 +68,13 @@ def create_setlist(username: str = Body(..., embed=True)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error creating setlist: {str(e)}") from e
 
-def update_setlist(username: str, songs: dict = Body(...), num_songs: int = Body(...), city: dict = Body(...), dates: list = Body(...)):
+def update_setlist(
+    songs: dict = Body(...),
+    num_songs: int = Body(...),
+    city: dict = Body(...),
+    dates: list = Body(...),
+    current_user: dict[str, str] = Depends(get_current_user),
+):
     try:
         update_data = {}
         if songs:
@@ -79,16 +87,19 @@ def update_setlist(username: str, songs: dict = Body(...), num_songs: int = Body
             update_data["dates"] = dates
         if not update_data:
             raise HTTPException(status_code=400, detail="No data provided for update")
-        resp = setlist_collection.update_one({"username": username}, {"$set": update_data})
+        resp = setlist_collection.update_one(
+            {"username": current_user["username"]},
+            {"$set": update_data},
+        )
         if resp.matched_count == 0:
             raise HTTPException(status_code=404, detail="Setlist not found")
         return {"status_code": 200, "message": "Setlist updated successfully"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error updating setlist: {str(e)}") from e
 
-def delete_setlist(username: str):
+def delete_setlist(current_user: dict[str, str] = Depends(get_current_user)):
     try:
-        resp = setlist_collection.delete_one({"username": username})
+        resp = setlist_collection.delete_one({"username": current_user["username"]})
         if resp.deleted_count == 0:
             raise HTTPException(status_code=404, detail="Setlist not found")
         return {"status_code": 200, "message": "Setlist deleted successfully"}

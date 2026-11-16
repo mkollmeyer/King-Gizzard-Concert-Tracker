@@ -1,9 +1,10 @@
 import base64
 import hashlib
+import secrets
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
-from fastapi import Body
+from fastapi import Depends, Header, HTTPException
 from src.config.db import session_collection, user_collection
 
 
@@ -11,63 +12,77 @@ def _session_id(token: str) -> str:
     digest = hashlib.sha256(token.encode("utf-8")).digest()
     return base64.b32encode(digest).decode("ascii").lower()
 
-def _handle_response(status: int, message: str, data: Any = None) -> dict[str, Any]:
-    return {"status": status, "message": message, "data": data}
 
-def create_session(
-    token: str = Body(..., alias="Token"),
-    user_id: str = Body(..., alias="userID"),
-) -> dict[str, Any]:
-    session = {
+def create_session_for_user(user_id: str) -> str:
+    token = secrets.token_urlsafe(32)
+    session_collection.insert_one({
         "id": _session_id(token),
         "userID": user_id,
         "expiresAt": datetime.now(timezone.utc) + timedelta(minutes=30),
-    }
-    session_collection.insert_one(session.copy())
-    return _handle_response(201, "Session created", session)
+    })
+    return token
 
-def invalidate(session_id: str) -> None:
-    session_collection.find_one_and_delete({"id": session_id})
 
-def invalidate_session(session_id: str) -> dict[str, Any]:
-    session_collection.find_one_and_delete({"id": session_id})
-    return _handle_response(200, "Session invalidated")
-
-def validate_session_token(token: str) -> dict[str, Any]:
+def validate_session_token(token: str) -> dict[str, Any] | None:
     session = session_collection.find_one({"id": _session_id(token)})
     if session is None:
-        return {"session": None, "user": None, "update": False}
+        return None
 
     user = user_collection.find_one({"id": session["userID"]})
     if user is None:
-        return {"session": None, "user": None, "update": False}
+        return None
 
     expires_at = session["expiresAt"]
     if expires_at.tzinfo is None:
         expires_at = expires_at.replace(tzinfo=timezone.utc)
 
-    now = datetime.now(timezone.utc)
-    if now >= expires_at:
-        invalidate(session["id"])
-        return {"session": None, "user": None, "update": False}
-
-    should_update = now >= expires_at - timedelta(days=15)
-    if should_update:
-        session["expiresAt"] = now + timedelta(days=30)
-        session_collection.update_one(
-            {"id": session["id"]},
-            {"$set": {"expiresAt": session["expiresAt"]}},
-        )
+    if datetime.now(timezone.utc) >= expires_at:
+        session_collection.delete_one({"id": session["id"]})
+        return None
 
     return {
         "session": {
             "id": session["id"],
             "userID": session["userID"],
-            "expiresAt": session["expiresAt"],
+            "expiresAt": expires_at,
         },
         "user": {
             "id": user["id"],
             "username": user["username"],
         },
-        "update": should_update,
+        "update": False,
     }
+
+
+def get_current_session(
+    authorization: str | None = Header(default=None),
+) -> dict[str, Any]:
+    scheme, separator, token = (authorization or "").partition(" ")
+    if scheme.lower() != "bearer" or not separator or not token.strip():
+        raise HTTPException(
+            status_code=401,
+            detail="Authentication required",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    session = validate_session_token(token.strip())
+    if session is None:
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid or expired session",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    return session
+
+
+def get_current_user(
+    session: dict[str, Any] = Depends(get_current_session),
+) -> dict[str, str]:
+    return session["user"]
+
+
+def invalidate_current_session(
+    session: dict[str, Any] = Depends(get_current_session),
+) -> dict[str, str]:
+    session_collection.delete_one({"id": session["session"]["id"]})
+    return {"message": "Session invalidated"}

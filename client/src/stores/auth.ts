@@ -1,9 +1,8 @@
 import { defineStore } from "pinia";
-import { createSession, createUser, signin } from "../router/userRoutes.ts";
+import { createUser, signin } from "../router/userRoutes.ts";
 import { create_user_setlists } from "../router/statRoutes.ts";
-import { signout as invalidateSession } from "../utils/auth.ts";
+import { getAuth, signout as invalidateSession } from "../utils/auth.ts";
 import { tokenService } from "../utils/token.ts";
-import { getAuth } from "../utils/auth.ts";
 
 export interface AuthState {
     token: string | null,
@@ -29,14 +28,15 @@ export const useAuthStore = defineStore('auth', {
             this.error = null;
             try {
                 const userCredential = await createUser(username, password);
-                await create_user_setlists(userCredential.username);
-                await createSession(userCredential.id);
+                tokenService.setToken(userCredential.token);
+                await create_user_setlists(userCredential.token);
                 this.user = userCredential.username;
-                this.token = tokenService.getToken();
+                this.token = userCredential.token;
                 return true;
             } catch (error: unknown) {
                 this.user = null;
                 this.token = null;
+                tokenService.removeToken();
                 this.error = new Error(
                     error instanceof Error && error.message === 'Username already in use'
                         ? error.message
@@ -49,13 +49,14 @@ export const useAuthStore = defineStore('auth', {
             this.error = null;
             try {
                 const userCredential = await signin(username, password);
-                await createSession(userCredential.id);
+                tokenService.setToken(userCredential.token);
                 this.user = userCredential.username;
-                this.token = tokenService.getToken();
+                this.token = userCredential.token;
                 return true;
             } catch (error: unknown) {
                 this.user = null;
                 this.token = null;
+                tokenService.removeToken();
                 this.error = new Error('Unable to log in');
                 return false;
             }
@@ -65,26 +66,26 @@ export const useAuthStore = defineStore('auth', {
         },
         async clearExpiredSession() {
             const session = await getAuth();
-            if (!session.session) return;
+            if (!session.session) {
+                this.user = null;
+                this.token = null;
+                this.error = null;
+                tokenService.removeToken();
+                return;
+            }
             const expiresAt = Date.parse(String(session.session.expiresAt));
             if (Number.isFinite(expiresAt) && Date.now() < expiresAt) return;
             this.user = null;
             this.token = null;
             this.error = null;
             tokenService.removeToken();
-            try {
-                await invalidateSession(session.session.id);
-            } catch (error: unknown) {
-                console.error("Unable to invalidate expired session:", error);
-            }
         },
         async signout() {
             if (!this.token) {
                 throw new Error("No active session to invalidate");
             }
             try {
-                const invalid = await getAuth();
-                await invalidateSession(invalid.session!.id);
+                await invalidateSession();
                 this.user = null;
                 this.token = null;
                 this.error = null;

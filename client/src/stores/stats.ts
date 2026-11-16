@@ -1,5 +1,7 @@
 import { get_user_setlists, get_setlists, update_user_setlists, type show } from '../router/statRoutes.ts'
 import { update_show } from '../utils/stat.ts';
+import { getAuth } from '../utils/auth.ts';
+import { tokenService } from '../utils/token.ts';
 import { defineStore } from 'pinia'
 
 type StatsState = {
@@ -16,31 +18,38 @@ export const useStatsStore = defineStore('stats', {
   }),
   actions: {
     async updateStats(id: string | null, date: string) {
-      let shows;
-      if (id != null) {
-        try {
-          shows = await get_setlists(date);
-        } catch (error: unknown) {
-          throw new Error('Unable to find setlist for that show');
-        }
-        const userShow = await get_user_setlists(id);
-        if (userShow.date?.includes(shows.date)) {
-          throw new Error("Show already added to the stats");
-        }
-        const newShow: show = update_show(userShow, shows.city, shows.date, shows.num_songs, shows.setlist);
-        await update_user_setlists(id, newShow.city, newShow.date, newShow.num_songs, newShow.setlist);
-        this.city = newShow.city;
-        this.num_songs = newShow.num_songs;
-        this.setlist = newShow.setlist;
+      if (id == null) return;
+
+      const token = tokenService.getToken();
+      const auth = await getAuth();
+      if (!token || auth.user?.username !== id) {
+        throw new Error('Cannot authenticate setlist');
       }
+
+      const shows = await get_setlists(date);
+      const userShow = await get_user_setlists(token);
+      if (userShow.date?.includes(shows.date)) {
+        throw new Error("Show already added to the stats");
+      }
+      const newShow: show = update_show(userShow, shows.city, shows.date, shows.num_songs, shows.setlist);
+      await update_user_setlists(token, newShow.city, newShow.date, newShow.num_songs, newShow.setlist);
+      this.city = newShow.city;
+      this.num_songs = newShow.num_songs;
+      this.setlist = newShow.setlist;
     },
     async getStats(id: string | null) {
-      if (id != null) {
-        const stats = await get_user_setlists(id);
-        this.city = stats.city;
-        this.num_songs = stats.num_songs;
-        this.setlist = stats.setlist;
+      if (id == null) return;
+
+      const token = tokenService.getToken();
+      const auth = await getAuth();
+      if (!token || auth.user?.username !== id) {
+        throw new Error('Cannot authenticate setlist');
       }
+
+      const stats = await get_user_setlists(token);
+      this.city = stats.city;
+      this.num_songs = stats.num_songs;
+      this.setlist = stats.setlist;
     }
   }
 })

@@ -1,12 +1,5 @@
-import * as base32 from 'hi-base32';
 import { type User, type Session } from '../router/userRoutes';
 import { tokenService } from './token';
-
-export function generateSecureToken(): string {
-	const bytes = new Uint8Array(20);
-	crypto.getRandomValues(bytes);
-	return base32.encode(bytes).toLowerCase();
-}
 
 export async function getAuth(): Promise<{
     session: Session | null;
@@ -14,17 +7,32 @@ export async function getAuth(): Promise<{
     update: boolean;
 }> {
     const token = tokenService.getToken();
-    const result = await fetch(`/api/sessions/validate_session/${token}`);
+    if (!token) {
+        return { session: null, user: null, update: false };
+    }
+
+    const result = await fetch('/api/sessions/current', {
+        headers: { Authorization: `Bearer ${token}` }
+    });
+    if (result.status === 401) {
+        return { session: null, user: null, update: false };
+    }
     if (!result.ok) {
         throw new Error(`HTTP error! status: ${result.status}`);
     }
     return result.json();
 }
 
-export async function signout(sessionID: string): Promise<void> {
-    const result = await fetch(`/api/sessions/invalidate_session/${sessionID}`, {
+export async function signout(): Promise<void> {
+    const token = tokenService.getToken();
+    if (!token) {
+        tokenService.removeToken();
+        return;
+    }
+
+    const result = await fetch('/api/sessions/current', {
         method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' }
+        headers: { Authorization: `Bearer ${token}` }
     });
     if (!result.ok) {
         throw new Error(`HTTP error! status: ${result.status}`);

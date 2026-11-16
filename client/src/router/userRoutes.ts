@@ -1,10 +1,12 @@
 import { hashPassword } from "../utils/password.ts";
-import { generateSecureToken } from "../utils/auth.ts";
-import { tokenService } from "../utils/token.ts";
 
 export interface User {
     id: string;
     username: string;
+};
+
+export interface AuthenticatedUser extends User {
+    token: string;
 };
 
 export interface Session {
@@ -13,7 +15,7 @@ export interface Session {
   expiresAt: Date;
 };
 
-export async function createUser(username: string, password: string): Promise<User> {
+export async function createUser(username: string, password: string): Promise<AuthenticatedUser> {
     const response = await fetch('/api/user/create_user', {
         method: 'POST',
         headers: {
@@ -28,11 +30,10 @@ export async function createUser(username: string, password: string): Promise<Us
         throw new Error(`HTTP error! status: ${response.status}`);
     }
     const res = await response.json();
-    const user: User = res.data;
-    return user;
+    return res.data;
 };
 
-export async function signin(username: string, password: string): Promise<User> {
+export async function signin(username: string, password: string): Promise<AuthenticatedUser> {
     const response = await fetch('/api/user/signin', {
         method: 'POST',
         headers: {
@@ -45,21 +46,4 @@ export async function signin(username: string, password: string): Promise<User> 
     }
     const result = await response.json();
     return result.data;
-};
-
-export async function createSession(userID: string): Promise<Session> {
-    const token = await generateSecureToken();
-    await tokenService.setToken(token);
-    const result = await fetch('/api/sessions/create_session', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ Token: token, userID: userID })
-    });
-    if (!result.ok) {
-        throw new Error(`HTTP error! status: ${result.status}`);
-    }
-    const response = await result.json();
-    return response.data;
 };

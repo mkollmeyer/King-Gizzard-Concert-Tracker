@@ -32,13 +32,12 @@ export async function get_setlists(date: string): Promise<newshow> {
     };
 };
 
-export async function create_user_setlists(username: string): Promise<show> {
+export async function create_user_setlists(token: string): Promise<show> {
     const ref = await fetch('/api/setlists/create_setlist', {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ username: username })
+            Authorization: `Bearer ${token}`
+        }
     });
     if (!ref.ok) {
         throw new Error(`HTTP error! status: ${ref.status}`);
@@ -47,11 +46,12 @@ export async function create_user_setlists(username: string): Promise<show> {
     return user.data;
 }
 
-export async function get_user_setlists(username: string): Promise<show> {
-    const ref = await fetch(`/api/setlists/get_setlist_by_username/${username}`, {
+export async function get_user_setlists(token: string): Promise<show> {
+    const ref = await fetch('/api/setlists/me', {
         method: 'GET',
         headers: {
             'Accept': 'application/json',
+            Authorization: `Bearer ${token}`
         }
     });
     if (!ref.ok) {
@@ -67,12 +67,13 @@ export async function get_user_setlists(username: string): Promise<show> {
     };
 };
 
-export async function update_user_setlists(username: string, city: Record<string, number>, dates: string[], num_songs: number, setlist: Record<string, number>): Promise<void> {
-    const ref = await fetch(`/api/setlists/update_setlist/${username}`, {
+export async function update_user_setlists(token: string, city: Record<string, number>, dates: string[], num_songs: number, setlist: Record<string, number>): Promise<void> {
+    const ref = await fetch('/api/setlists/me', {
         method: 'PUT',
         headers: {
             'Accept': 'application/json',
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`
         },
         body: JSON.stringify({ city, dates, num_songs, songs: setlist })
     });
