@@ -21,13 +21,14 @@
 .title {
   display: flex;
   justify-content: center;
-  padding-bottom: 15%;
+  padding: 0 1rem clamp(2rem, 10vw, 8rem);
 }
 
 .main-title {
   font-family: 'Davida-Becker', sans-serif;
   font-weight: bold;
-  font-size: 5rem;
+  font-size: clamp(1.75rem, 8vw, 5rem);
+  max-width: 100%;
 }
 
 .text {

@@ -84,17 +84,13 @@ async function logout() {
   list-style: none;
   display: flex;
   justify-content: space-between;
-  padding-top: 0.5rem;
-  padding-bottom: 0.5rem;
   padding: 0.5rem;
-  position: sticky; 
-  align-items: center;
-  justify-items: top;
-  background-color: var(--background-color);
   position: sticky;
-  top: 0;
-  left: 0;
-  width: 98.4%;
+  align-items: center;
+  background-color: var(--background-color);
+  width: 100%;
+  box-sizing: border-box;
+  gap: 0.5rem;
   z-index: 1000;
   align-self: flex-start;
 }
@@ -102,12 +98,15 @@ async function logout() {
 .left {
   font-family: 'Gamer-Bold', sans-serif;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 12px;
+  min-width: 0;
 }
 
 .form-label {
   font-family: 'Gamer-Bold', sans-serif;
+  font-size: clamp(0.75rem, 1.5vw, 1rem);
   color: var(--text);
   text-shadow: 
     -0.75px -0.75px 0 #fff,  
@@ -125,12 +124,35 @@ async function logout() {
   display: flex;
   margin-left: auto;
   justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
   gap: 10px;
   fill: var(--link-color);
 }
 
+.navigation button,
+.navigation select {
+  font-size: clamp(0.75rem, 1.5vw, 1rem);
+}
+
+.navigation select {
+  max-width: 100%;
+}
+
 .navigation a:hover {
   color: #0084ff;
+}
+
+@media (max-width: 600px) {
+  .navigation {
+    flex-direction: column;
+  }
+
+  .left,
+  .right {
+    justify-content: center;
+    margin-left: 0;
+  }
 }
 
 </style>
