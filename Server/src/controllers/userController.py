@@ -17,13 +17,6 @@ def get_user_by_username(username: str):
         raise HTTPException(status_code=404, detail="User not found")
     return {"data": user_data(data)}
 
-def get_all_users():
-    try:
-        users = user_collection.find()
-        return [user_data(user) for user in users]
-    except Exception as e:
-        return HTTPException(status_code=500, detail=f"Error retrieving users: {str(e)}")
-
 def create_user(username: str = Body(...), password: str = Body(...)):
     id = str(uuid.uuid4())
     try:
@@ -40,26 +33,6 @@ def create_user(username: str = Body(...), password: str = Body(...)):
         raise HTTPException(status_code=409, detail=f"{field} already exists") from e
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error creating user: {str(e)}") from e
-
-def update_user(user_id: str, username: str = None, password: str = None):
-    try:
-        update_data = {}
-        if username:
-            update_data["username"] = username
-        if password:
-            update_data["password"] = password
-
-        if not update_data:
-            return HTTPException(status_code=400, detail="No data provided for update")
-
-        resp = user_collection.update_one({"id": user_id}, {"$set": update_data})
-        if resp.matched_count == 0:
-            return HTTPException(status_code=404, detail="User not found")
-        return {"status_code": 200, "message": "User updated successfully"}
-    except DuplicateKeyError as e:
-        raise HTTPException(status_code=409, detail="Username already exists") from e
-    except Exception as e:
-        return HTTPException(status_code=500, detail=f"Error updating user: {str(e)}")
 
 def delete_user(user_id: str):
     try:

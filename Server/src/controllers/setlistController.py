@@ -48,13 +48,6 @@ def get_setlist_by_username(username: str):
         }
     }
 
-def get_all_setlists():
-    try:
-        setlists = setlist_collection.find()
-        return [setlist_data(setlist) for setlist in setlists]
-    except Exception as e:
-        return HTTPException(status_code=500, detail=f"Error retrieving setlists: {str(e)}")
-
 def create_setlist(username: str = Body(..., embed=True)):
     try:
         setlist = {
