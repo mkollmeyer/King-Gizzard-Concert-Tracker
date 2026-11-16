@@ -14,7 +14,7 @@ export async function getAuth(): Promise<{
     update: boolean;
 }> {
     const token = tokenService.getToken();
-    const result = await fetch(`http://localhost:8000/api/sessions/validate_session/${token}`);
+    const result = await fetch(`/api/sessions/validate_session/${token}`);
     if (!result.ok) {
         throw new Error(`HTTP error! status: ${result.status}`);
     }
@@ -22,7 +22,7 @@ export async function getAuth(): Promise<{
 }
 
 export async function signout(sessionID: string): Promise<void> {
-    const result = await fetch(`http://localhost:8000/api/sessions/invalidate_session/${sessionID}`, {
+    const result = await fetch(`/api/sessions/invalidate_session/${sessionID}`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' }
     });

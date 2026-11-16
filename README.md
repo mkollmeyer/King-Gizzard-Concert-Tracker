@@ -13,5 +13,7 @@ docker compose --env-file .env up --build
 
 The root `.env` supplies values referenced with `${...}` in `docker-compose.yml`. A service's `env_file` only supplies variables inside that container.
 
+The frontend sends API requests to the same origin; the production Nginx container forwards `/api` requests to the backend over the Compose network.
+
 ## Coming soon
 Coming up, the website will be deployed on an AWS

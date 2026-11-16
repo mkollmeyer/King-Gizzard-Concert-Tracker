@@ -15,7 +15,7 @@ export interface Session {
 };
 
 export async function createUser(username: string, password: string): Promise<User> {
-    const response = await fetch('http://localhost:8000/api/user/create_user', {
+    const response = await fetch('/api/user/create_user', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -34,7 +34,7 @@ export async function createUser(username: string, password: string): Promise<Us
 };
 
 export async function signin(username: string, password: string): Promise<User> {
-    const response = await fetch(`http://localhost:8000/api/user/get_user_by_username/${username}`);
+    const response = await fetch(`/api/user/get_user_by_username/${username}`);
     if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
     }
@@ -49,7 +49,7 @@ export async function signin(username: string, password: string): Promise<User> 
 export async function createSession(userID: string): Promise<Session> {
     const token = await generateSecureToken();
     await tokenService.setToken(token);
-    const result = await fetch('http://localhost:8000/api/sessions/create_session', {
+    const result = await fetch('/api/sessions/create_session', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
