@@ -49,7 +49,6 @@ export const useAuthStore = defineStore('auth', {
             this.error = null;
             try {
                 const userCredential = await signin(username, password);
-                console.log("User signed in:", userCredential);
                 await createSession(userCredential.id);
                 this.user = userCredential.username;
                 this.token = tokenService.getToken();

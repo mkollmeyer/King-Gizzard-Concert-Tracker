@@ -6,8 +6,6 @@ import { useAuthStore } from '../stores/auth.ts'
 const auth = useAuthStore()
 auth.error = null
 
-console.log("Loaded login.vue");
-
 const username = ref('')
 const password = ref('')
 const localError = ref('')
