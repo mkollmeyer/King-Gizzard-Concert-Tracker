@@ -34,8 +34,6 @@ services:
       dockerfile: Dockerfile
     container_name: kglw-backend
     image: maxkollmeyer/kglw-backend:v1.3
-    ports:
-      - "${BACKEND_PORT:-8000}:8000"
     environment:
       PORT: "8000"
       NODE_ENV: "${NODE_ENV:-production}"
