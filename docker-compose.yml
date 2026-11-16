@@ -14,9 +14,9 @@ services:
 
   backend:
     env_file:
-      - ./server/.env
+      - ./Server/.env
     build:
-      context: ./server
+      context: ./Server
       dockerfile: Dockerfile
     container_name: kglw-backend
     image: maxkollmeyer/kglw-backend:v1.0
