@@ -59,8 +59,15 @@ def validate_session_token(token: str) -> dict[str, Any]:
             {"$set": {"expiresAt": session["expiresAt"]}},
         )
 
-    return _handle_response(
-        200,
-        "Session validated",
-        {"session": session, "user": user, "update": should_update},
-    )
+    return {
+        "session": {
+            "id": session["id"],
+            "userID": session["userID"],
+            "expiresAt": session["expiresAt"],
+        },
+        "user": {
+            "id": user["id"],
+            "username": user["username"],
+        },
+        "update": should_update,
+    }

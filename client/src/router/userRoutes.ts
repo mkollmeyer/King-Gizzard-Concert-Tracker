@@ -23,6 +23,9 @@ export async function createUser(username: string, password: string): Promise<Us
         body: JSON.stringify({ username: username, password: await hashPassword(password) })
     });
     if (!response.ok) {
+        if (response.status === 409) {
+            throw new Error('Username already in use')
+        }
         throw new Error(`HTTP error! status: ${response.status}`);
     }
     const res = await response.json();
@@ -35,22 +38,17 @@ export async function signin(username: string, password: string): Promise<User> 
     if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
     }
-    console.log("Found username");
     const result = await response.json();
     const user: User = result.data;
-    console.log(user.password);
     if (await verifyPassword(password, user.password)) {
-        console.log("Password verified");
         return user;
     };
-    console.log("Password verification failed");
     throw new Error("Invalid username or password");
 };
 
 export async function createSession(userID: string): Promise<Session> {
     const token = await generateSecureToken();
     await tokenService.setToken(token);
-    console.log(token);
     const result = await fetch('http://localhost:8000/api/sessions/create_session', {
         method: 'POST',
         headers: {
@@ -62,6 +60,5 @@ export async function createSession(userID: string): Promise<Session> {
         throw new Error(`HTTP error! status: ${result.status}`);
     }
     const response = await result.json();
-    console.log(response.data);
     return response.data;
 };

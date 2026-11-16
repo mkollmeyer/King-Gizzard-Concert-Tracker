@@ -33,27 +33,23 @@ async function submitSignup() {
   <section class="signup-view">
     <div class="signup-card">
       <h1 style="color: white; font-family: Gamer-Bold; font-size: 2rem">Create Account</h1>
-
-      <label class="field">
-        <span>Username</span>
-        <input v-model="username" type="text" />
-      </label>
-
-      <label class="field">
-        <span>Password</span>
-        <input v-model="password" type="password" />
-      </label>
-
-      <label class="field">
-        <span>Confirm Password</span>
-        <input v-model="confirmPassword" type="password" />
-      </label>
-
-      <p v-if="localError" class="error-text">{{ localError }}</p>
-      <p v-else-if="auth.error" class="error-text">{{ auth.error }}</p>
-
-      <button type="button" class="primary-btn" @click="submitSignup()">Create Account</button>
-
+      <form @submit.prevent="submitSignup()">
+        <label class="field">
+          <span>Username</span>
+          <input v-model="username" type="text" />
+        </label>
+        <label class="field">
+          <span>Password</span>
+          <input v-model="password" type="password" />
+        </label>
+        <label class="field">
+          <span>Confirm Password</span>
+          <input v-model="confirmPassword" type="password" />
+        </label>
+        <p v-if="localError" class="error-text">{{ localError }}</p>
+        <p v-else-if="auth.error" class="error-text">{{ auth.error }}</p>
+        <button type="submit" class="primary-btn">Create Account</button>
+      </form>
       <p class="switch-text">
         Already have an account?
         <router-link to="/login" class="switch-link">Sign in</router-link>
@@ -105,6 +101,8 @@ async function submitSignup() {
   background: var(--button-bg);
   color: #f9f8f4;
   font-weight: 600;
+  width: 100%;
+  margin-top: 0.9rem;
 }
 
 .error-text {

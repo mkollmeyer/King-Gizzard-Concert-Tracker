@@ -31,16 +31,16 @@ async def get_setlist(date: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error retrieving setlist: {str(e)}") from e
 
-def get_setlist_by_id(setlist_id: str):
+def get_setlist_by_username(username: str):
     try:
-        data = setlist_collection.find_one({"id": setlist_id})
+        data = setlist_collection.find_one({"username": username})
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error retrieving setlist: {str(e)}") from e
     if data is None:
         raise HTTPException(status_code=404, detail="Setlist not found")
     return {
         "data": {
-            "id": data["id"],
+            "username": data["username"],
             "dates": data.get("dates", []),
             "num_songs": data.get("num_songs", 0),
             "songs": data.get("songs", {}),
@@ -55,10 +55,10 @@ def get_all_setlists():
     except Exception as e:
         return HTTPException(status_code=500, detail=f"Error retrieving setlists: {str(e)}")
 
-def create_setlist(id: str = Body(..., embed=True)):
+def create_setlist(username: str = Body(..., embed=True)):
     try:
         setlist = {
-            "id": id,
+            "username": username,
             "dates": [],
             "num_songs": 0,
             "songs": {},
@@ -73,7 +73,7 @@ def create_setlist(id: str = Body(..., embed=True)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error creating setlist: {str(e)}") from e
 
-def update_setlist(setlist_id: str, songs: dict = Body(...), num_songs: int = Body(...), city: dict = Body(...), dates: list = Body(...)):
+def update_setlist(username: str, songs: dict = Body(...), num_songs: int = Body(...), city: dict = Body(...), dates: list = Body(...)):
     try:
         update_data = {}
         if songs:
@@ -86,16 +86,16 @@ def update_setlist(setlist_id: str, songs: dict = Body(...), num_songs: int = Bo
             update_data["dates"] = dates
         if not update_data:
             raise HTTPException(status_code=400, detail="No data provided for update")
-        resp = setlist_collection.update_one({"id": setlist_id}, {"$set": update_data})
+        resp = setlist_collection.update_one({"username": username}, {"$set": update_data})
         if resp.matched_count == 0:
             raise HTTPException(status_code=404, detail="Setlist not found")
         return {"status_code": 200, "message": "Setlist updated successfully"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error updating setlist: {str(e)}") from e
 
-def delete_setlist(setlist_id: str):
+def delete_setlist(username: str):
     try:
-        resp = setlist_collection.delete_one({"id": setlist_id})
+        resp = setlist_collection.delete_one({"username": username})
         if resp.deleted_count == 0:
             raise HTTPException(status_code=404, detail="Setlist not found")
         return {"status_code": 200, "message": "Setlist deleted successfully"}

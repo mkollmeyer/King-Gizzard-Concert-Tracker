@@ -24,7 +24,6 @@ export async function get_setlists(date: string): Promise<newshow> {
     };
     const res = await ref.json();
     const data = res.data;
-    console.log(data);
     return {
         date: data.date,
         city: data.city,
@@ -33,13 +32,13 @@ export async function get_setlists(date: string): Promise<newshow> {
     };
 };
 
-export async function create_user_setlists(id: string): Promise<show> {
+export async function create_user_setlists(username: string): Promise<show> {
     const ref = await fetch(`http://localhost:8000/api/setlists/create_setlist`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ id: id })
+        body: JSON.stringify({ username: username })
     });
     if (!ref.ok) {
         throw new Error(`HTTP error! status: ${ref.status}`);
@@ -48,8 +47,8 @@ export async function create_user_setlists(id: string): Promise<show> {
     return user.data;
 }
 
-export async function get_user_setlists(id: string): Promise<show> {
-    const ref = await fetch(`http://localhost:8000/api/setlists/get_setlist_by_id/${id}`, {
+export async function get_user_setlists(username: string): Promise<show> {
+    const ref = await fetch(`http://localhost:8000/api/setlists/get_setlist_by_username/${username}`, {
         method: 'GET',
         headers: {
             'Accept': 'application/json',
@@ -68,8 +67,8 @@ export async function get_user_setlists(id: string): Promise<show> {
     };
 };
 
-export async function update_user_setlists(id: string, city: Record<string, number>, dates: string[], num_songs: number, setlist: Record<string, number>): Promise<void> {
-    const ref = await fetch(`http://localhost:8000/api/setlists/update_setlist/${id}`, {
+export async function update_user_setlists(username: string, city: Record<string, number>, dates: string[], num_songs: number, setlist: Record<string, number>): Promise<void> {
+    const ref = await fetch(`http://localhost:8000/api/setlists/update_setlist/${username}`, {
         method: 'PUT',
         headers: {
             'Accept': 'application/json',

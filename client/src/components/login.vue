@@ -29,20 +29,19 @@ function clearErrors() {
   <section class="signup-view">
     <div class="signup-card">
       <h1 style="color: white; font-family: Gamer-Bold">Sign In</h1>
-      <label class="field">
-        <span>Username</span>
-        <input v-model="username" type="text" />
-      </label>
-
-      <label class="field">
-        <span>Password</span>
-        <input v-model="password" type="password" />
-      </label>
-
-      <p v-if="localError" class="error-text">{{ localError }}</p>
-      <p v-else-if="auth.error" class="error-text">{{ auth.error }}</p>
-
-      <button type="button" class="primary-btn" @click="submitLogin()">Sign In</button>
+      <form @submit.prevent="submitLogin()">
+        <label class="field">
+          <span>Username</span>
+          <input v-model="username" type="text" />
+        </label>
+        <label class="field">
+          <span>Password</span>
+          <input v-model="password" type="password" />
+        </label>
+        <p v-if="localError" class="error-text">{{ localError }}</p>
+        <p v-else-if="auth.error" class="error-text">{{ auth.error }}</p>
+        <button type="submit" class="primary-btn">Sign In</button>
+      </form>
 
       <p class="switch-text">
         Don't Have an Account?
@@ -88,6 +87,7 @@ function clearErrors() {
 }
 
 .primary-btn {
+  margin-top: 0.9rem;
   font-family: 'Roboto Mono Variable', monospace;
   border: none;
   padding: 0.7rem 0.9rem;
@@ -95,6 +95,7 @@ function clearErrors() {
   background: var(--button-bg);
   color: #f9f8f4;
   font-weight: 600;
+  width: 100%;
 }
 
 .error-text {

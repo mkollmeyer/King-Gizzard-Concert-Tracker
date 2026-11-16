@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 
 class Setlist(BaseModel):
-    id: str
+    username: str
     dates: list = []
     num_songs: int = 0
     songs: dict = {}
@@ -15,7 +15,7 @@ class Show(BaseModel):
 
 def setlist_data(setlist_collection):
     return {
-        "id": setlist_collection.id,
+        "username": setlist_collection.username,
         "dates": setlist_collection.dates,
         "num_songs": setlist_collection.num_songs,
         "songs": setlist_collection.songs,

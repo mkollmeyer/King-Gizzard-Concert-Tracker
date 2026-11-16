@@ -22,29 +22,44 @@ const stats = useStatsStore()
 
 const localError = ref('')
 const date = ref('')
+const songSearch = ref('')
+const citySearch = ref('')
 const songChartCanvas = ref<HTMLCanvasElement | null>(null)
 const cityChartCanvas = ref<HTMLCanvasElement | null>(null)
-const totalChartCanvas = ref<HTMLCanvasElement | null>(null)
 const songEntries = computed(() => sortByCount(stats.setlist))
 const cityEntries = computed(() => sortByCount(stats.city))
+const filteredSongEntries = computed(() => filterEntries(songEntries.value, songSearch.value))
+const filteredCityEntries = computed(() => filterEntries(cityEntries.value, citySearch.value))
 
 let songChart: BarChart | null = null
 let cityChart: BarChart | null = null
-let totalChart: BarChart | null = null
+let themeObserver: MutationObserver | null = null
 
 function sortByCount(counts: Record<string, number>): CountEntry[] {
   return Object.entries(counts).sort(([, countA], [, countB]) => countB - countA)
+}
+
+function filterEntries(entries: CountEntry[], search: string): CountEntry[] {
+  const query = search.trim().toLowerCase()
+  return query
+    ? entries.filter(([name]) => name.toLowerCase().includes(query))
+    : entries
 }
 
 function chartHeight(entryCount: number): string {
   return `${Math.max(260, entryCount * 32)}px`
 }
 
+function chartBarColor(): string {
+  return getComputedStyle(document.documentElement)
+    .getPropertyValue('--button-bg')
+    .trim()
+}
+
 function createBarChart(
   canvas: HTMLCanvasElement,
   label: string,
   entries: CountEntry[],
-  color: string,
 ): BarChart {
   return new Chart<'bar', number[], string>(canvas, {
     type: 'bar',
@@ -53,7 +68,7 @@ function createBarChart(
       datasets: [{
         label,
         data: entries.map(([, count]) => count),
-        backgroundColor: color,
+        backgroundColor: chartBarColor(),
         borderRadius: 5
       }]
     },
@@ -85,6 +100,13 @@ function createBarChart(
 Chart.defaults.font.family = 'Gamer-Bold'
 Chart.defaults.color = '#fff'
 
+function updateChartBarColor(chart: BarChart | null) {
+  const dataset = chart?.data.datasets[0]
+  if (!chart || !dataset) return
+  dataset.backgroundColor = chartBarColor()
+  chart.update()
+}
+
 function updateBarChart(chart: BarChart | null, entries: CountEntry[]) {
   if (!chart) return
   chart.data.labels = entries.map(([name]) => name)
@@ -99,43 +121,43 @@ function updateBarChart(chart: BarChart | null, entries: CountEntry[]) {
 }
 
 onMounted(async () => {
+  themeObserver = new MutationObserver(() => {
+    updateChartBarColor(songChart)
+    updateChartBarColor(cityChart)
+  })
+  themeObserver.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ['data-theme']
+  })
+
   const user = auth.getUser
   if (!user) {
     await router.push('/login')
     return
   }
 
-  await stats.getStats(user.id)
+  await stats.getStats(user)
   if (songChartCanvas.value) {
-    songChart = createBarChart(songChartCanvas.value, 'Times seen', songEntries.value, '#01696f')
+    songChart = createBarChart(songChartCanvas.value, 'Times seen', filteredSongEntries.value)
   }
   if (cityChartCanvas.value) {
-    cityChart = createBarChart(cityChartCanvas.value, 'Shows attended', cityEntries.value, '#a12c7b')
-  }
-  if (totalChartCanvas.value) {
-    totalChart = createBarChart(
-      totalChartCanvas.value,
-      'Songs seen',
-      [['Songs seen', stats.num_songs]],
-      '#aa3bff'
-    )
+    cityChart = createBarChart(cityChartCanvas.value, 'Shows attended', filteredCityEntries.value)
   }
 })
 
 watch(
-  () => [stats.setlist, stats.city, stats.num_songs] as const,
-  () => {
-    updateBarChart(songChart, songEntries.value)
-    updateBarChart(cityChart, cityEntries.value)
-    updateBarChart(totalChart, [['Songs seen', stats.num_songs]])
+  [filteredSongEntries, filteredCityEntries],
+  ([songs, cities]) => {
+    updateBarChart(songChart, songs)
+    updateBarChart(cityChart, cities)
   },
   { deep: true }
 )
 
 onBeforeUnmount(() => {
+  themeObserver?.disconnect()
   songChart?.destroy()
   cityChart?.destroy()
-  totalChart?.destroy()
 })
 
 async function submitDate() {
@@ -144,7 +166,7 @@ async function submitDate() {
     if (!date.value) localError.value = 'Please select a date'
     const [year, month, day] = date.value.split('-');
     const formattedDate = `${day}-${month}-${year}`;
-    await stats.updateStats(auth.getUser?.id ?? null, formattedDate)
+    await stats.updateStats(auth.getUser ?? null, formattedDate)
   } catch (error) {
     localError.value = error instanceof Error ? error.message : 'Unable to update stats'
   }
@@ -168,14 +190,28 @@ async function submitDate() {
     <section class="charts-grid" aria-label="Your listening statistics">
       <article class="chart-card">
         <h2 class="chart-description">Most seen songs</h2>
-        <div class="chart-container" :style="{ height: chartHeight(songEntries.length) }">
+        <label class="chart-search">
+          <span class="visually-hidden">Search songs</span>
+          <input v-model="songSearch" type="search" placeholder="Search songs..." />
+        </label>
+        <p v-if="songSearch && filteredSongEntries.length === 0" class="empty-search">
+          No matching songs.
+        </p>
+        <div class="chart-container" :style="{ height: chartHeight(filteredSongEntries.length) }">
           <canvas ref="songChartCanvas" aria-label="Bar chart of most seen songs" />
         </div>
       </article>
 
       <article class="chart-card">
         <h2 class="chart-description">Most visited cities</h2>
-        <div class="chart-container" :style="{ height: chartHeight(cityEntries.length) }">
+        <label class="chart-search">
+          <span class="visually-hidden">Search cities</span>
+          <input v-model="citySearch" type="search" placeholder="Search cities..." />
+        </label>
+        <p v-if="citySearch && filteredCityEntries.length === 0" class="empty-search">
+          No matching cities.
+        </p>
+        <div class="chart-container" :style="{ height: chartHeight(filteredCityEntries.length) }">
           <canvas ref="cityChartCanvas" aria-label="Bar chart of most visited cities" />
         </div>
       </article>
@@ -240,7 +276,7 @@ button {
   border: 0;
   border-radius: 0.4rem;
   padding: 0.7rem 1rem;
-  background: #254c37;
+  background: var(--button-bg);
   color: #fff;
   font: inherit;
   cursor: pointer;
@@ -274,6 +310,39 @@ button {
   font-family: 'Gamer-Bold', sans-serif;
   text-shadow: 2px 2px 4px var(--shadow);
   font-size: 30px;
+}
+
+.chart-search {
+  display: block;
+  margin: 0.75rem 0;
+}
+
+.chart-search input {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: 0.4rem;
+  color: var(--text-h);
+  background: var(--bg);
+  font: inherit;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.empty-search {
+  margin: 0;
+  color: #fff;
 }
 
 .Songsdiv {

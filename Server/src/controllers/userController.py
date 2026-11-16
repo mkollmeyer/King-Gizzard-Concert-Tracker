@@ -1,4 +1,5 @@
 from fastapi import Body, HTTPException
+from pymongo.errors import DuplicateKeyError
 from src.config.db import user_collection
 from src.models.userModel import user_data
 import uuid
@@ -33,6 +34,10 @@ def create_user(username: str = Body(...), password: str = Body(...)):
         }
         user_collection.insert_one(user.copy())
         return {"data": user}
+    except DuplicateKeyError as e:
+        key_pattern = (e.details or {}).get("keyPattern", {})
+        field = "username" if "username" in key_pattern else "id"
+        raise HTTPException(status_code=409, detail=f"{field} already exists") from e
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error creating user: {str(e)}") from e
 
@@ -51,6 +56,8 @@ def update_user(user_id: str, username: str = None, password: str = None):
         if resp.matched_count == 0:
             return HTTPException(status_code=404, detail="User not found")
         return {"status_code": 200, "message": "User updated successfully"}
+    except DuplicateKeyError as e:
+        raise HTTPException(status_code=409, detail="Username already exists") from e
     except Exception as e:
         return HTTPException(status_code=500, detail=f"Error updating user: {str(e)}")
 

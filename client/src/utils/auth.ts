@@ -8,7 +8,11 @@ export function generateSecureToken(): string {
 	return base32.encode(bytes).toLowerCase();
 }
 
-export async function getAuth(): Promise<{ session: Session | null; user: User | null; update: boolean }> {
+export async function getAuth(): Promise<{
+    session: Session | null;
+    user: Pick<User, 'id' | 'username'> | null;
+    update: boolean;
+}> {
     const token = tokenService.getToken();
     const result = await fetch(`http://localhost:8000/api/sessions/validate_session/${token}`);
     if (!result.ok) {
