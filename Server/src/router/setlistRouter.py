@@ -1,4 +1,4 @@
-from src.controllers.setlistController import get_setlist, get_all_setlists, get_setlist_by_username, create_setlist, update_setlist, delete_setlist
+from src.controllers.setlistController import get_setlist, get_setlist_by_username, create_setlist, update_setlist, delete_setlist
 from fastapi import APIRouter
 
 setlist_router = APIRouter(prefix="/api/setlists", tags=["setlists"])

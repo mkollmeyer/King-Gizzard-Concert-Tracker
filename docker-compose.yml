@@ -33,7 +33,7 @@ services:
       context: ./Server
       dockerfile: Dockerfile
     container_name: kglw-backend
-    image: maxkollmeyer/kglw-backend:v1.0
+    image: maxkollmeyer/kglw-backend:v1.1
     ports:
       - "${BACKEND_PORT:-8000}:8000"
     environment:

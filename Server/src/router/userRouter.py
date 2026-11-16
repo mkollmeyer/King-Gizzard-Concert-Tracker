@@ -1,4 +1,4 @@
-from src.controllers.userController import get_user_by_id, get_user_by_username, get_all_users, create_user, update_user, delete_user
+from src.controllers.userController import get_user_by_id, get_user_by_username, create_user, delete_user
 from fastapi import APIRouter
 
 user_router = APIRouter(prefix="/api/user", tags=["users"])
