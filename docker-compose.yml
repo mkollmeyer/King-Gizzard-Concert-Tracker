@@ -20,7 +20,7 @@ services:
       context: ./client
       dockerfile: Dockerfile
     container_name: kglw-frontend
-    image: maxkollmeyer/kglw-frontend:v1.1
+    image: maxkollmeyer/kglw-frontend:v1.2
     depends_on:
       - backend
     networks:
@@ -33,7 +33,7 @@ services:
       context: ./Server
       dockerfile: Dockerfile
     container_name: kglw-backend
-    image: maxkollmeyer/kglw-backend:v1.1
+    image: maxkollmeyer/kglw-backend:v1.2
     ports:
       - "${BACKEND_PORT:-8000}:8000"
     environment:

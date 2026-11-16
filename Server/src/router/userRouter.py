@@ -1,9 +1,7 @@
-from src.controllers.userController import get_user_by_id, get_user_by_username, create_user, delete_user
+from src.controllers.userController import authenticate_user, create_user
 from fastapi import APIRouter
 
 user_router = APIRouter(prefix="/api/user", tags=["users"])
 
-user_router.add_api_route("/get_user_by_id/{user_id}", get_user_by_id, methods=["GET"])
-user_router.add_api_route("/get_user_by_username/{username}", get_user_by_username, methods=["GET"])
+user_router.add_api_route("/signin", authenticate_user, methods=["POST"])
 user_router.add_api_route("/create_user", create_user, methods=["POST"])
-user_router.add_api_route("/delete_user/{user_id}", delete_user, methods=["DELETE"])

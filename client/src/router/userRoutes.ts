@@ -1,11 +1,10 @@
-import { verifyPassword, hashPassword } from "../utils/password.ts";
+import { hashPassword } from "../utils/password.ts";
 import { generateSecureToken } from "../utils/auth.ts";
 import { tokenService } from "../utils/token.ts";
 
 export interface User {
     id: string;
     username: string;
-    password: string;
 };
 
 export interface Session {
@@ -34,16 +33,18 @@ export async function createUser(username: string, password: string): Promise<Us
 };
 
 export async function signin(username: string, password: string): Promise<User> {
-    const response = await fetch(`/api/user/get_user_by_username/${username}`);
+    const response = await fetch('/api/user/signin', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ username, password })
+    });
     if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
     }
     const result = await response.json();
-    const user: User = result.data;
-    if (await verifyPassword(password, user.password)) {
-        return user;
-    };
-    throw new Error("Invalid username or password");
+    return result.data;
 };
 
 export async function createSession(userID: string): Promise<Session> {
